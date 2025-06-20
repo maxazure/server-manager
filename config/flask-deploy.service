@@ -1,0 +1,53 @@
+[Unit]
+Description=Flask Deployment Management Application
+After=network.target
+Wants=network.target
+
+[Service]
+Type=forking
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/server-manager/flask_app
+Environment=PATH=/home/deploy/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=FLASK_APP=app.py
+Environment=FLASK_ENV=production
+Environment=PYTHONPATH=/home/deploy/server-manager/flask_app
+
+# Use Gunicorn to run the Flask app
+ExecStart=/home/deploy/.local/bin/gunicorn \
+    --bind 127.0.0.1:5000 \
+    --workers 3 \
+    --worker-class sync \
+    --timeout 120 \
+    --keepalive 5 \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --preload \
+    --daemon \
+    --pid /var/run/flask-deploy.pid \
+    --access-logfile /var/log/flask-deploy/access.log \
+    --error-logfile /var/log/flask-deploy/error.log \
+    --log-level info \
+    app:app
+
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PIDFile=/var/run/flask-deploy.pid
+
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/deploy /var/log/flask-deploy /var/run
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flask-deploy
+
+[Install]
+WantedBy=multi-user.target

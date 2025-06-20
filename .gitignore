@@ -1,0 +1,412 @@
+# =============================================================================
+# 自动化部署管理系统 - Git 忽略文件
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Python 相关
+# -----------------------------------------------------------------------------
+# 字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 分发/打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 单元测试/覆盖率报告
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# 环境变量
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mkdocs
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# -----------------------------------------------------------------------------
+# 数据库文件
+# -----------------------------------------------------------------------------
+# SQLite 数据库
+*.db
+*.sqlite
+*.sqlite3
+flask_app/data/deploy.db
+
+# 数据库备份
+*.db.backup
+*.db.bak
+backup/*.db
+
+# -----------------------------------------------------------------------------
+# 日志文件
+# -----------------------------------------------------------------------------
+# 部署日志
+deploy/logs/*.log
+*.log
+logs/
+log/
+
+# 系统日志
+*.out
+*.err
+
+# -----------------------------------------------------------------------------
+# 临时文件和缓存
+# -----------------------------------------------------------------------------
+# 系统临时文件
+.tmp/
+tmp/
+temp/
+.cache/
+
+# 编辑器临时文件
+*~
+.*.swp
+.*.swo
+*.tmp
+
+# -----------------------------------------------------------------------------
+# 操作系统生成的文件
+# -----------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# -----------------------------------------------------------------------------
+# IDE 和编辑器文件
+# -----------------------------------------------------------------------------
+# VSCode
+.vscode/
+*.code-workspace
+.history/
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# -----------------------------------------------------------------------------
+# 安全敏感文件
+# -----------------------------------------------------------------------------
+# 密钥和证书
+*.key
+*.pem
+*.crt
+*.cert
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.pub
+
+# 配置文件中的敏感信息
+*secret*
+*password*
+.secrets
+config.local.*
+settings.local.*
+
+# SSL 证书
+ssl/
+certs/
+certificates/
+
+# -----------------------------------------------------------------------------
+# 服务和运行时文件
+# -----------------------------------------------------------------------------
+# PID 文件
+*.pid
+
+# Socket 文件
+*.sock
+
+# Systemd
+*.service.bak
+
+# Nginx
+nginx_*
+*.nginx
+
+# 进程锁文件
+*.lock
+
+# -----------------------------------------------------------------------------
+# 备份文件
+# -----------------------------------------------------------------------------
+# 通用备份
+backup/
+backups/
+*.bak
+*.backup
+*.old
+*.orig
+
+# 数据库备份
+db_backup_*
+database_backup_*
+
+# 配置备份
+config_backup_*
+*.conf.bak
+
+# -----------------------------------------------------------------------------
+# 开发和测试文件
+# -----------------------------------------------------------------------------
+# 测试输出
+test_output/
+test_results/
+screenshots/
+
+# 开发用临时文件
+dev/
+development/
+sandbox/
+experiments/
+
+# Mock 数据
+mock_data/
+sample_data/
+test_data/
+
+# -----------------------------------------------------------------------------
+# 构建和部署相关
+# -----------------------------------------------------------------------------
+# Docker
+Dockerfile.local
+docker-compose.override.yml
+.dockerignore.local
+
+# 部署脚本的本地版本
+deploy.local.sh
+install.local.sh
+
+# 环境特定配置
+config.local.json
+settings.local.yaml
+
+# 构建输出
+build/
+dist/
+release/
+
+# -----------------------------------------------------------------------------
+# 文档和静态资源
+# -----------------------------------------------------------------------------
+# 编译后的文档
+docs/_build/
+docs/build/
+
+# 生成的静态文件
+static/generated/
+static/compiled/
+
+# 缩略图
+*.thumb
+
+# -----------------------------------------------------------------------------
+# 网络和下载文件
+# -----------------------------------------------------------------------------
+# 下载的文件
+downloads/
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# 包管理器下载
+node_modules/
+bower_components/
+
+# -----------------------------------------------------------------------------
+# 本项目特定
+# -----------------------------------------------------------------------------
+# 用户自定义的部署脚本
+deploy/scripts/deploy_custom_*.sh
+deploy/scripts/*_local.sh
+
+# 用户上传的配置
+config/custom/
+config/local/
+
+# 运行时生成的 webhook 配置
+webhook/hooks.local.json
+webhook/hooks.production.json
+
+# 用户数据目录
+user_data/
+uploads/
+
+# 安装过程中的临时文件
+install_*.log
+setup_*.log
+
+# 性能测试结果
+benchmark/
+performance/
+
+# 监控数据
+monitoring/
+metrics/
+
+# -----------------------------------------------------------------------------
+# 注释说明
+# -----------------------------------------------------------------------------
+# 
+# 此 .gitignore 文件专为自动化部署管理系统设计，包含：
+# 
+# 1. Python 应用常见的忽略模式
+# 2. 数据库文件（避免提交用户数据）
+# 3. 日志文件（运行时生成）
+# 4. 安全敏感文件（密钥、证书等）
+# 5. 临时文件和缓存
+# 6. 系统特定文件
+# 7. 开发工具生成的文件
+# 
+# 如需添加特定文件到版本控制，使用：
+# git add -f <文件名>
+# 
+# 如需临时忽略已跟踪的文件：
+# git update-index --skip-worktree <文件名>
+#

@@ -1,0 +1,148 @@
+[
+  {
+    "id": "deploy-project1",
+    "execute-command": "/opt/deploy/scripts/deploy_project1.sh",
+    "command-working-directory": "/opt/deploy/scripts",
+    "response-message": "Deployment triggered for project1",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hmac-sha256",
+            "secret": "your-webhook-secret-project1",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature-256"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/main",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        }
+      ]
+    },
+    "pass-arguments-to-command": [
+      {
+        "source": "payload",
+        "name": "repository.name"
+      },
+      {
+        "source": "payload", 
+        "name": "ref"
+      },
+      {
+        "source": "payload",
+        "name": "head_commit.id"
+      }
+    ]
+  },
+  {
+    "id": "deploy-project2", 
+    "execute-command": "/opt/deploy/scripts/deploy_project2.sh",
+    "command-working-directory": "/opt/deploy/scripts",
+    "response-message": "Deployment triggered for project2",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hmac-sha256",
+            "secret": "your-webhook-secret-project2",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature-256"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/develop",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        }
+      ]
+    },
+    "pass-arguments-to-command": [
+      {
+        "source": "payload",
+        "name": "repository.name"
+      },
+      {
+        "source": "payload",
+        "name": "ref"
+      },
+      {
+        "source": "payload",
+        "name": "head_commit.id"
+      }
+    ]
+  },
+  {
+    "id": "deploy-tag-release",
+    "execute-command": "/opt/deploy/scripts/deploy_production.sh",
+    "command-working-directory": "/opt/deploy/scripts", 
+    "response-message": "Production deployment triggered",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hmac-sha256",
+            "secret": "your-webhook-secret-production",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature-256"
+            }
+          }
+        },
+        {
+          "or": [
+            {
+              "match": {
+                "type": "value",
+                "value": "refs/tags/",
+                "parameter": {
+                  "source": "payload",
+                  "name": "ref"
+                }
+              }
+            },
+            {
+              "match": {
+                "type": "value",
+                "value": "released",
+                "parameter": {
+                  "source": "payload",
+                  "name": "action"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "pass-arguments-to-command": [
+      {
+        "source": "payload",
+        "name": "repository.name"
+      },
+      {
+        "source": "payload",
+        "name": "ref"
+      },
+      {
+        "source": "payload", 
+        "name": "release.tag_name"
+      }
+    ]
+  }
+]

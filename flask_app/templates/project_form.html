@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }}项目 - 自动部署管理系统{% endblock %}
+{% block header %}{{ action }}项目{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-{{ 'plus' if action == 'Add' else 'edit' }} text-blue-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">{{ action }}项目</h3>
+                    <p class="text-sm text-gray-600">
+                        {% if action == 'Add' %}
+                        配置新的部署项目信息
+                        {% else %}
+                        修改项目配置信息
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" class="p-6 space-y-6">
+            <!-- 项目名称 -->
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-tag mr-1"></i>
+                    项目名称 <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="name" 
+                       name="name" 
+                       value="{{ project.name if project else '' }}"
+                       required 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="例如：my-website">
+                <p class="mt-1 text-xs text-gray-500">项目的唯一标识符，用于生成部署脚本和日志</p>
+            </div>
+
+            <!-- 仓库地址 -->
+            <div>
+                <label for="repo_url" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fab fa-git-alt mr-1"></i>
+                    Git 仓库地址 <span class="text-red-500">*</span>
+                </label>
+                <input type="url" 
+                       id="repo_url" 
+                       name="repo_url" 
+                       value="{{ project.repo_url if project else '' }}"
+                       required 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="https://github.com/username/repository.git">
+                <p class="mt-1 text-xs text-gray-500">Git 仓库的 HTTPS 地址</p>
+            </div>
+
+            <!-- 分支名称 -->
+            <div>
+                <label for="branch" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-code-branch mr-1"></i>
+                    分支名称
+                </label>
+                <input type="text" 
+                       id="branch" 
+                       name="branch" 
+                       value="{{ project.branch if project else 'main' }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="main">
+                <p class="mt-1 text-xs text-gray-500">要部署的分支，默认为 main</p>
+            </div>
+
+            <!-- 部署目录 -->
+            <div>
+                <label for="deploy_dir" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-folder mr-1"></i>
+                    部署目录 <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="deploy_dir" 
+                       name="deploy_dir" 
+                       value="{{ project.deploy_dir if project else '' }}"
+                       required 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="/var/www/my-website">
+                <p class="mt-1 text-xs text-gray-500">服务器上的项目部署路径</p>
+            </div>
+
+            <!-- Webhook Secret -->
+            <div>
+                <label for="secret" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-key mr-1"></i>
+                    Webhook Secret
+                    {% if not project %}
+                    <span class="text-xs text-gray-500">(留空自动生成)</span>
+                    {% endif %}
+                </label>
+                <div class="flex">
+                    <input type="text" 
+                           id="secret" 
+                           name="secret" 
+                           value="{{ project.secret if project else '' }}"
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="{% if not project %}将自动生成{% endif %}">
+                    <button type="button" 
+                            onclick="generateSecret()" 
+                            class="px-4 py-2 bg-gray-600 text-white rounded-r-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        <i class="fas fa-random"></i>
+                    </button>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">用于验证 GitHub webhook 请求的密钥</p>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <a href="{{ url_for('project.list_projects') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    返回列表
+                </a>
+                
+                <div class="flex space-x-3">
+                    {% if project %}
+                    <button type="button" 
+                            onclick="previewScript()"
+                            class="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
+                        <i class="fas fa-eye mr-2"></i>
+                        预览脚本
+                    </button>
+                    {% endif %}
+                    
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-save mr-2"></i>
+                        {{ '保存' if action == 'Edit' else '创建' }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 帮助信息 -->
+    <div class="mt-6 bg-blue-50 rounded-lg p-4">
+        <h4 class="font-medium text-blue-900 mb-2">
+            <i class="fas fa-info-circle mr-1"></i>
+            配置说明
+        </h4>
+        <ul class="text-sm text-blue-800 space-y-1">
+            <li>• <strong>项目名称</strong>：将用于生成部署脚本文件名和日志标识</li>
+            <li>• <strong>仓库地址</strong>：确保服务器能够访问该仓库</li>
+            <li>• <strong>部署目录</strong>：确保目录存在且有适当的权限</li>
+            <li>• <strong>Webhook Secret</strong>：用于验证来自 GitHub 的请求</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function generateSecret() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 32; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    document.getElementById('secret').value = result;
+}
+
+function previewScript() {
+    const name = document.getElementById('name').value;
+    const repoUrl = document.getElementById('repo_url').value;
+    const branch = document.getElementById('branch').value || 'main';
+    const deployDir = document.getElementById('deploy_dir').value;
+    
+    if (!name || !repoUrl || !deployDir) {
+        alert('请先填写必填字段');
+        return;
+    }
+    
+    const scriptContent = `#!/bin/bash
+
+# Deploy script for ${name}
+PROJECT_NAME="${name}"
+REPO_URL="${repoUrl}"
+BRANCH="${branch}"
+DEPLOY_DIR="${deployDir}"
+LOG_DIR="/opt/deploy/logs"
+
+# ... (complete deployment script content)`;
+
+    const newWindow = window.open('', '_blank', 'width=800,height=600');
+    newWindow.document.write(`
+        <html>
+            <head>
+                <title>部署脚本预览 - ${name}</title>
+                <style>
+                    body { font-family: monospace; padding: 20px; line-height: 1.4; }
+                    pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                </style>
+            </head>
+            <body>
+                <h2>部署脚本预览: ${name}</h2>
+                <pre>${scriptContent}</pre>
+                <button onclick="window.close()" style="margin-top: 20px; padding: 10px 20px;">关闭</button>
+            </body>
+        </html>
+    `);
+}
+
+// Auto-generate secret on page load if adding new project
+document.addEventListener('DOMContentLoaded', function() {
+    const secretInput = document.getElementById('secret');
+    if (!secretInput.value && window.location.pathname.includes('/add')) {
+        generateSecret();
+    }
+});
+</script>
+{% endblock %}

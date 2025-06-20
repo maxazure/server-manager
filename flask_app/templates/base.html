@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}自动部署管理系统{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar-link.active { 
+            @apply bg-blue-700 text-white; 
+        }
+        .flash-message {
+            animation: slideInDown 0.3s ease-out;
+        }
+        @keyframes slideInDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-blue-800 text-white">
+            <div class="p-4">
+                <h1 class="text-xl font-bold">
+                    <i class="fas fa-rocket mr-2"></i>
+                    部署管理系统
+                </h1>
+            </div>
+            
+            {% if current_user %}
+            <nav class="mt-8">
+                <a href="{{ url_for('index') }}" class="sidebar-link flex items-center px-4 py-3 text-white hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    仪表盘
+                </a>
+                <a href="{{ url_for('project.list_projects') }}" class="sidebar-link flex items-center px-4 py-3 text-white hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-folder mr-3"></i>
+                    项目管理
+                </a>
+                <a href="{{ url_for('logview.list_logs') }}" class="sidebar-link flex items-center px-4 py-3 text-white hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-file-alt mr-3"></i>
+                    部署日志
+                </a>
+                <a href="{{ url_for('logview.deployment_stats') }}" class="sidebar-link flex items-center px-4 py-3 text-white hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    统计报表
+                </a>
+            </nav>
+            
+            <div class="absolute bottom-0 w-64 p-4 border-t border-blue-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        <span class="text-sm">{{ current_user.username }}</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('auth.change_password') }}" class="text-blue-300 hover:text-white" title="修改密码">
+                            <i class="fas fa-key"></i>
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="text-blue-300 hover:text-white" title="退出登录">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            {% block header %}{% endblock %}
+                        </h2>
+                        <div class="text-sm text-gray-500">
+                            <i class="far fa-clock mr-1"></i>
+                            <span id="current-time"></span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flash-messages" class="px-6 py-2">
+                        {% for category, message in messages %}
+                            <div class="flash-message alert alert-{{ 'danger' if category == 'error' else category }} bg-{{ 'red' if category == 'error' else 'green' if category == 'success' else 'blue' if category == 'info' else 'yellow' }}-100 border border-{{ 'red' if category == 'error' else 'green' if category == 'success' else 'blue' if category == 'info' else 'yellow' }}-400 text-{{ 'red' if category == 'error' else 'green' if category == 'success' else 'blue' if category == 'info' else 'yellow' }}-700 px-4 py-3 rounded mb-2 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' if category == 'info' else 'exclamation-triangle' }} mr-2"></i>
+                                    {{ message }}
+                                </div>
+                                <button onclick="this.parentElement.style.display='none'" class="text-lg">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(() => {
+            const flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                flashMessages.style.opacity = '0';
+                flashMessages.style.transition = 'opacity 0.5s';
+                setTimeout(() => flashMessages.remove(), 500);
+            }
+        }, 5000);
+
+        // Active sidebar link
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

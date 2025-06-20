@@ -1,0 +1,30 @@
+[Unit]
+Description=Webhook Server for Auto Deployment
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=webhook
+Group=webhook
+WorkingDirectory=/opt/deploy
+ExecStart=/usr/bin/webhook -hooks /etc/webhook/hooks.json -verbose -hotreload -port 9000 -ip 0.0.0.0
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=webhook
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/deploy /var/log
+
+# Environment
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[Install]
+WantedBy=multi-user.target

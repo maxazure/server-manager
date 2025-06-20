@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}项目管理 - 自动部署管理系统{% endblock %}
+{% block header %}项目管理{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center">
+            <h3 class="text-lg font-medium text-gray-700">
+                <i class="fas fa-folder mr-2"></i>
+                项目列表
+            </h3>
+            <span class="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                {{ projects|length }} 个项目
+            </span>
+        </div>
+        <a href="{{ url_for('project.add_project') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            添加项目
+        </a>
+    </div>
+</div>
+
+{% if projects %}
+<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    {% for project in projects %}
+    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        <div class="p-6">
+            <!-- Project Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-folder text-blue-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-lg font-semibold text-gray-800">{{ project.name }}</h4>
+                        <p class="text-sm text-gray-500">{{ project.branch }} 分支</p>
+                    </div>
+                </div>
+                <div class="flex space-x-1">
+                    <a href="{{ url_for('project.edit_project', project_id=project.id) }}" 
+                       class="p-2 text-gray-400 hover:text-blue-600 transition-colors" 
+                       title="编辑项目">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button onclick="confirmDelete({{ project.id }}, '{{ project.name }}')" 
+                            class="p-2 text-gray-400 hover:text-red-600 transition-colors" 
+                            title="删除项目">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Project Info -->
+            <div class="space-y-3 mb-4">
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-link w-4 text-gray-400 mr-2"></i>
+                    <span class="truncate">{{ project.repo_url }}</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-folder-open w-4 text-gray-400 mr-2"></i>
+                    <span class="truncate">{{ project.deploy_dir }}</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-clock w-4 text-gray-400 mr-2"></i>
+                    <span>{{ project.updated_at or project.created_at }}</span>
+                </div>
+            </div>
+
+            <!-- Deployment Stats -->
+            <div class="border-t pt-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-lg font-semibold text-gray-800">{{ project.deployment_count or 0 }}</div>
+                        <div class="text-xs text-gray-500">总部署</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-semibold text-green-600">{{ project.successful_deployments or 0 }}</div>
+                        <div class="text-xs text-gray-500">成功</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-semibold text-red-600">{{ project.failed_deployments or 0 }}</div>
+                        <div class="text-xs text-gray-500">失败</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Deployment -->
+            {% if project.last_deployment %}
+            <div class="border-t pt-4 mt-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">上次部署</span>
+                    <span class="text-sm text-gray-500">{{ project.last_deployment }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="border-t pt-4 mt-4 flex space-x-2">
+                <a href="{{ url_for('logview.list_logs', project_id=project.id) }}" 
+                   class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-file-alt mr-1"></i>
+                    查看日志
+                </a>
+                <button onclick="showWebhookInfo({{ project.id }}, '{{ project.name }}', '{{ project.secret }}')" 
+                        class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
+                    <i class="fas fa-link mr-1"></i>
+                    Webhook
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg shadow p-12 text-center">
+    <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+    <h3 class="text-xl font-medium text-gray-700 mb-2">暂无项目</h3>
+    <p class="text-gray-500 mb-6">开始创建您的第一个部署项目</p>
+    <a href="{{ url_for('project.add_project') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+        <i class="fas fa-plus mr-2"></i>
+        添加项目
+    </a>
+</div>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-2">确认删除</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    确定要删除项目 "<span id="deleteProjectName" class="font-medium"></span>" 吗？
+                    <br>此操作将删除所有相关的部署日志，且不可恢复。
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <form id="deleteForm" method="POST" class="inline">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 mr-2">
+                        删除
+                    </button>
+                </form>
+                <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Webhook Info Modal -->
+<div id="webhookModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Webhook 配置信息</h3>
+            <button onclick="closeWebhookModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                <div class="p-2 bg-gray-50 rounded border">
+                    <span id="webhookProjectName"></span>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Webhook URL</label>
+                <div class="flex">
+                    <input type="text" id="webhookUrl" readonly class="flex-1 p-2 bg-gray-50 border rounded-l border-r-0 text-sm">
+                    <button onclick="copyToClipboard('webhookUrl')" class="px-3 bg-blue-600 text-white rounded-r hover:bg-blue-700">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Secret</label>
+                <div class="flex">
+                    <input type="text" id="webhookSecret" readonly class="flex-1 p-2 bg-gray-50 border rounded-l border-r-0 text-sm">
+                    <button onclick="copyToClipboard('webhookSecret')" class="px-3 bg-blue-600 text-white border-l-0 hover:bg-blue-700">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button onclick="regenerateSecret()" class="px-3 bg-green-600 text-white rounded-r hover:bg-green-700">
+                        <i class="fas fa-refresh"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 p-4 rounded">
+                <h4 class="font-medium text-blue-900 mb-2">GitHub 配置说明</h4>
+                <ol class="text-sm text-blue-800 space-y-1">
+                    <li>1. 在 GitHub 仓库中进入 Settings → Webhooks</li>
+                    <li>2. 点击 "Add webhook"</li>
+                    <li>3. 填入上述 Webhook URL</li>
+                    <li>4. Content type 选择 "application/json"</li>
+                    <li>5. 填入 Secret</li>
+                    <li>6. 选择触发事件：Push、Tag、Release</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentProjectId = null;
+
+function confirmDelete(projectId, projectName) {
+    currentProjectId = projectId;
+    document.getElementById('deleteProjectName').textContent = projectName;
+    document.getElementById('deleteForm').action = `/projects/delete/${projectId}`;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    currentProjectId = null;
+}
+
+function showWebhookInfo(projectId, projectName, secret) {
+    document.getElementById('webhookProjectName').textContent = projectName;
+    document.getElementById('webhookUrl').value = `${window.location.origin}/webhook/deploy-${projectName}`;
+    document.getElementById('webhookSecret').value = secret;
+    document.getElementById('webhookModal').classList.remove('hidden');
+    currentProjectId = projectId;
+}
+
+function closeWebhookModal() {
+    document.getElementById('webhookModal').classList.add('hidden');
+    currentProjectId = null;
+}
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = element.nextElementSibling;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    button.classList.add('bg-green-600');
+    
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('bg-green-600');
+        button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    }, 1000);
+}
+
+function regenerateSecret() {
+    if (!currentProjectId) return;
+    
+    if (!confirm('确定要重新生成 Secret 吗？这将使现有的 webhook 配置失效。')) {
+        return;
+    }
+    
+    fetch(`/projects/regenerate-secret/${currentProjectId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('webhookSecret').value = data.secret;
+            alert('Secret 已重新生成');
+        } else {
+            alert('重新生成失败: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('重新生成失败: ' + error);
+    });
+}
+
+// Close modals when clicking outside
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+
+document.getElementById('webhookModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeWebhookModal();
+    }
+});
+</script>
+{% endblock %}
