@@ -2,6 +2,13 @@
 
 基于 Ubuntu 的完整自动化部署解决方案，集成 GitHub Webhook、Flask 管理界面和实时日志监控。
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Ubuntu](https://img.shields.io/badge/ubuntu-20.04%20%7C%2022.04-orange.svg)](https://ubuntu.com/)
+[![Flask](https://img.shields.io/badge/flask-2.x-green.svg)](https://flask.palletsprojects.com/)
+
+> 🎯 **一键部署，自动化管理** - 让部署变得简单高效！
+
 ## ✨ 功能特性
 
 ### 🔧 核心功能
@@ -23,6 +30,41 @@
 - **权限控制**: 登录验证和会话管理
 - **HTTPS 支持**: Let's Encrypt SSL 证书
 - **安全配置**: systemd 服务隔离和权限限制
+
+## 📸 系统预览
+
+### 🎥 在线演示
+- **演示地址**: [https://demo.server-manager.com](https://demo.server-manager.com) (即将上线)
+- **演示账户**: `demo` / `demo123`
+
+### 🖼️ 界面截图
+
+<table>
+  <tr>
+    <td width="50%">
+      <h4>📊 仪表盘</h4>
+      <img src="docs/images/dashboard.png" alt="仪表盘界面" width="100%">
+      <p>实时监控部署状态和统计信息</p>
+    </td>
+    <td width="50%">
+      <h4>📁 项目管理</h4>
+      <img src="docs/images/projects.png" alt="项目管理界面" width="100%">
+      <p>可视化项目配置和管理</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h4>📄 日志查看</h4>
+      <img src="docs/images/logs.png" alt="日志查看界面" width="100%">
+      <p>详细的部署过程日志</p>
+    </td>
+    <td width="50%">
+      <h4>📈 统计报表</h4>
+      <img src="docs/images/stats.png" alt="统计报表界面" width="100%">
+      <p>部署成功率和趋势分析</p>
+    </td>
+  </tr>
+</table>
 
 ## 🏗️ 系统架构
 
@@ -97,7 +139,7 @@ server-manager/
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/server-manager.git
+git clone https://github.com/maxazure/server-manager.git
 cd server-manager
 
 # 运行安装脚本
@@ -388,13 +430,132 @@ webhook -hooks /etc/webhook/hooks.json -verbose -hotreload
 - **多语言**: 国际化支持
 - **自定义面板**: 可配置的监控面板
 
+## ❓ 常见问题
+
+<details>
+<summary><strong>Q: 支持哪些 Git 仓库提供商？</strong></summary>
+
+A: 目前主要支持 GitHub，理论上支持所有使用 Git 协议的仓库，包括：
+- GitHub (完全支持)
+- GitLab (部分支持)
+- Gitee (部分支持)
+- 自建 Git 服务器 (需要手动配置)
+</details>
+
+<details>
+<summary><strong>Q: 可以同时部署多个项目吗？</strong></summary>
+
+A: 可以！系统支持多项目管理，每个项目可以有独立的：
+- 部署脚本
+- Webhook 配置
+- 日志记录
+- 部署目录
+</details>
+
+<details>
+<summary><strong>Q: 支持哪些部署类型？</strong></summary>
+
+A: 支持多种部署场景：
+- 静态网站 (HTML/CSS/JS)
+- Node.js 应用
+- Python 应用
+- PHP 应用
+- Docker 容器
+- 自定义脚本部署
+</details>
+
+<details>
+<summary><strong>Q: 如何备份数据？</strong></summary>
+
+A: 可以使用以下方式备份：
+```bash
+# 使用 Makefile 一键备份
+make backup
+
+# 手动备份数据库
+cp flask_app/data/deploy.db backup/deploy_$(date +%Y%m%d).db
+
+# 备份日志文件
+tar -czf backup/logs_$(date +%Y%m%d).tar.gz deploy/logs/
+```
+</details>
+
+<details>
+<summary><strong>Q: 系统资源占用如何？</strong></summary>
+
+A: 系统资源占用很低：
+- **内存**: ~100MB (Flask + Webhook 服务)
+- **CPU**: 空闲时 <1%，部署时根据项目大小
+- **磁盘**: 基础安装 ~50MB，日志和数据库随使用增长
+- **网络**: 仅在 Git 拉取时占用
+</details>
+
 ## 🤝 贡献指南
 
-1. Fork 本项目
-2. 创建功能分支：`git checkout -b feature/new-feature`
-3. 提交更改：`git commit -am 'Add new feature'`
-4. 推送分支：`git push origin feature/new-feature`
-5. 提交 Pull Request
+我们欢迎所有形式的贡献！🎉
+
+### 🔧 开发流程
+
+1. **Fork 本项目** 到你的 GitHub 账户
+2. **克隆项目** 到本地：
+   ```bash
+   git clone https://github.com/your-username/server-manager.git
+   cd server-manager
+   ```
+3. **创建功能分支**：
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+4. **开发和测试** 你的功能
+5. **提交更改**：
+   ```bash
+   git commit -m "feat: add amazing feature"
+   ```
+6. **推送到你的分支**：
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. **创建 Pull Request**
+
+### 📝 提交规范
+
+我们使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
+
+- `feat:` 新功能
+- `fix:` 修复 bug
+- `docs:` 文档更新
+- `style:` 代码格式化
+- `refactor:` 代码重构
+- `test:` 测试相关
+- `chore:` 构建或工具变更
+
+### 🧪 开发环境
+
+```bash
+# 安装开发依赖
+pip install -r requirements-dev.txt
+
+# 运行测试
+python -m pytest
+
+# 代码格式化
+black .
+flake8 .
+
+# 启动开发服务器
+cd flask_app
+python app.py
+```
+
+### 🐛 报告问题
+
+发现 bug？请 [创建 Issue](https://github.com/maxazure/server-manager/issues/new) 并提供：
+
+1. **环境信息** (操作系统、Python 版本等)
+2. **复现步骤** 
+3. **期望行为** vs **实际行为**
+4. **错误日志** (如果有)
+5. **截图** (如果适用)
 
 ## 📄 许可证
 
@@ -409,9 +570,9 @@ webhook -hooks /etc/webhook/hooks.json -verbose -hotreload
 
 ## 📞 支持
 
-- **文档**: [查看完整文档](https://github.com/your-username/server-manager/wiki)
-- **问题反馈**: [提交 Issue](https://github.com/your-username/server-manager/issues)
-- **讨论交流**: [Discussions](https://github.com/your-username/server-manager/discussions)
+- **文档**: [查看完整文档](https://github.com/maxazure/server-manager/wiki)
+- **问题反馈**: [提交 Issue](https://github.com/maxazure/server-manager/issues)
+- **讨论交流**: [Discussions](https://github.com/maxazure/server-manager/discussions)
 
 ---
 

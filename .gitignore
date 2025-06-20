@@ -50,6 +50,12 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# CI/CD 相关报告
+bandit-report.json
+pylint-report.json
+safety-report.json
+test-results/
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
